@@ -60,16 +60,15 @@ fn remove(index: u32) -> Result<Vec<String>, anyhow::Error> {
     }
 }
 
-fn show(only_pending: bool) -> Result<Vec<String>, anyhow::Error> {
+fn display(todo_type: TodoType) -> Result<Vec<String>, anyhow::Error> {
     let mut results = vec![];
     let todos = read_lines(DATA_STORE)?;
     for (i, todo) in todos.flatten().enumerate() {
-        if only_pending && todo.starts_with(PENDING_PREFIX) {
+        if todo_type == TodoType::Pending && todo.starts_with(PENDING_PREFIX) {
             results.push(format!("{}. {}", i + 1, todo));
         }
     }
-    let prefix = if only_pending { "Pending" } else { "All" };
-    results.push(format!("{} TODO items listed.", prefix));
+    results.push(format!("{:?} TODO items listed.", todo_type));
     Ok(results)
 }
 
@@ -89,10 +88,10 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
             remove(index)
         },
         Command::List => {
-            show(true)
+            display(TodoType::Pending)
         },
         Command::Audit => {
-            show(false)
+            display(TodoType::All)
         },
         Command::Reset => {
             reset()

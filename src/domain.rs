@@ -24,6 +24,13 @@ pub enum Command {
     Reset,
 }
 
+#[derive(Debug)]
+#[derive(PartialEq)]
+pub enum TodoType {
+    Pending,
+    All
+}
+
 pub fn parse_command() -> Command {
     return Command::parse();
 }
