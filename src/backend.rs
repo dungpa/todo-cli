@@ -20,6 +20,11 @@ const DATA_STORE: &str = "todo.txt";
 const PENDING_PREFIX: &str = "[ ]";
 const COMPLETED_PREFIX: &str = "[x]";
 
+#[cfg(windows)]
+const LINE_ENDING: &'static str = "\r\n";
+#[cfg(not(windows))]
+const LINE_ENDING: &'static str = "\n";
+
 fn add(todo: String) -> Result<Vec<String>, anyhow::Error> {
     let mut results = vec![];
     let mut file = OpenOptions::new()
@@ -52,7 +57,7 @@ fn remove(index: u32) -> Result<Vec<String>, anyhow::Error> {
         Err(anyhow!("Unable to find TODO item {}.", index))
     } else {
         // This is inefficient since we read all entries, remove one entry and save all others back to file.
-        fs::write(DATA_STORE, remaining.join("\n"))
+        fs::write(DATA_STORE, remaining.join(LINE_ENDING))
             .with_context(|| format!("Couldn't write to file: {}", DATA_STORE))?;
 
         results.push(format!("TODO item #{} removed.", index));
@@ -78,7 +83,7 @@ fn complete(index: u32) -> Result<Vec<String>, anyhow::Error> {
         Err(anyhow!("Unable to find TODO item {}.", index))
     } else {
         // This is inefficient since we read all entries, transform one entry and save all of them back to file.
-        fs::write(DATA_STORE, transformed.join("\n"))
+        fs::write(DATA_STORE, transformed.join(LINE_ENDING))
             .with_context(|| format!("Couldn't write to file: {}", DATA_STORE))?;
 
         results.push(format!("TODO item #{} completed.", index));
@@ -90,11 +95,11 @@ fn display(todo_type: TodoType) -> Result<Vec<String>, anyhow::Error> {
     let mut results = vec![];
     let todos = read_lines(DATA_STORE)?;
     for (i, todo) in todos.flatten().enumerate() {
-        if todo_type == TodoType::Pending && todo.starts_with(PENDING_PREFIX) {
+        if todo_type == TodoType::All || todo.starts_with(PENDING_PREFIX) {
             results.push(format!("{}. {}", i + 1, todo));
         }
     }
-    results.push(format!("{:?} TODO items listed.", todo_type));
+    results.push(format!("{:?} TODO items displayed.", todo_type));
     Ok(results)
 }
 

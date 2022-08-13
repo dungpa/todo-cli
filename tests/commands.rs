@@ -17,10 +17,10 @@ fn add_todo_item_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 fn remove_todo_item_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("todo-cli")?;
-    cmd1.arg("reset").spawn()?;
+    cmd1.arg("reset").spawn()?.wait()?;
 
     let mut cmd2 = Command::cargo_bin("todo-cli")?;
-    cmd2.arg("add").arg("First one").spawn()?;
+    cmd2.arg("add").arg("First one").spawn()?.wait()?;
 
     let mut cmd = Command::cargo_bin("todo-cli")?;
     cmd.arg("remove").arg("1");
@@ -34,10 +34,10 @@ fn remove_todo_item_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 fn complete_todo_item_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("todo-cli")?;
-    cmd1.arg("reset").spawn()?;
+    cmd1.arg("reset").spawn()?.wait()?;
 
     let mut cmd2 = Command::cargo_bin("todo-cli")?;
-    cmd2.arg("add").arg("First one").spawn()?;
+    cmd2.arg("add").arg("First one").spawn()?.wait()?;
 
     let mut cmd = Command::cargo_bin("todo-cli")?;
     cmd.arg("complete").arg("1");
@@ -51,13 +51,13 @@ fn complete_todo_item_should_succeed() -> Result<(), Box<dyn std::error::Error>>
 #[test]
 fn list_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("todo-cli")?;
-    cmd1.arg("add").arg("First one").spawn()?;
+    cmd1.arg("add").arg("First one").spawn()?.wait()?;
 
     let mut cmd = Command::cargo_bin("todo-cli")?;
     cmd.arg("list");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("Pending TODO items listed."));
+        .stdout(predicate::str::contains("Pending TODO items displayed."));
 
     Ok(())
 }
@@ -65,13 +65,13 @@ fn list_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 fn audit_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("todo-cli")?;
-    cmd1.arg("add").arg("First one").spawn()?;
+    cmd1.arg("add").arg("First one").spawn()?.wait()?;
 
     let mut cmd = Command::cargo_bin("todo-cli")?;
     cmd.arg("audit");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("All TODO items listed."));
+        .stdout(predicate::str::contains("All TODO items displayed."));
 
     Ok(())
 }
@@ -79,16 +79,16 @@ fn audit_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 fn stats_todo_item_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("todo-cli")?;
-    cmd1.arg("reset").spawn()?;
+    cmd1.arg("reset").spawn()?.wait()?;
 
     let mut cmd2 = Command::cargo_bin("todo-cli")?;
-    cmd2.arg("add").arg("First one").spawn()?;
+    cmd2.arg("add").arg("First one").spawn()?.wait()?;
 
     let mut cmd3 = Command::cargo_bin("todo-cli")?;
-    cmd3.arg("complete").arg("1").spawn()?;
+    cmd3.arg("complete").arg("1").spawn()?.wait()?;
 
     let mut cmd4 = Command::cargo_bin("todo-cli")?;
-    cmd4.arg("add").arg("Second one").spawn()?;
+    cmd4.arg("add").arg("Second one").spawn()?.wait()?;
 
     let mut cmd = Command::cargo_bin("todo-cli")?;
     cmd.arg("stats");
@@ -102,7 +102,7 @@ fn stats_todo_item_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 fn reset_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("todo-cli")?;
-    cmd1.arg("add").arg("First one").spawn()?;
+    cmd1.arg("add").arg("First one").spawn()?.wait()?;
 
     let mut cmd = Command::cargo_bin("todo-cli")?;
     cmd.arg("reset");
