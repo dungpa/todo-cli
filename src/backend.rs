@@ -65,6 +65,14 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
             results.push("Pending TODO items listed.".into());
             Ok(results)
         },
+        Command::Audit => {
+            let todos = read_lines(data_store)?;
+            for (i, todo) in todos.flatten().enumerate() {
+                results.push(format!("{}. {}", i + 1, todo));
+            }
+            results.push("All TODO items listed.".into());
+            Ok(results)
+        },
         Command::Reset => {
             fs::remove_file(data_store)?;
             results.push("All TODO items deleted.".into());

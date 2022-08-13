@@ -46,6 +46,20 @@ fn list_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+fn audit_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd1 = Command::cargo_bin("todo-cli")?;
+    cmd1.arg("add").arg("First one").spawn()?;
+
+    let mut cmd = Command::cargo_bin("todo-cli")?;
+    cmd.arg("audit");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("All TODO items listed."));
+
+    Ok(())
+}
+
+#[test]
 fn reset_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("todo-cli")?;
     cmd1.arg("add").arg("First one").spawn()?;

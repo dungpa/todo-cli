@@ -17,7 +17,10 @@ pub struct RemoveCommand {
 pub enum Command {
     Add(AddCommand),
     Remove(RemoveCommand),
+    /// Show pending TODOs
     List,
+    /// Show all TODOs including pending and completed ones
+    Audit,
     Reset,
 }
 
