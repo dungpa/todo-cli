@@ -1,12 +1,13 @@
 use std::fs::OpenOptions;
 use std::io::prelude::*;
+use crate::domain::*;
 mod domain;
 
 fn main() {
-    let args = domain::parse_command();
+    let args = parse_command();
     println!("Arguments: {:?}", args);
     match args {
-        domain::Command::Add(domain::AddCommand { todo }) => {
+        Command::Add(AddCommand { todo }) => {
             let mut file = OpenOptions::new()
                             .create(true)
                             .append(true)
