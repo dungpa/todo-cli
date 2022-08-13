@@ -18,7 +18,7 @@ where P: AsRef<Path>, {
 
 const DATA_STORE: &str = "todo.txt";
 const PENDING_PREFIX: &str = "[ ]";
-const _COMPLETED_PREFIX: &str = "[x]";
+const COMPLETED_PREFIX: &str = "[x]";
 
 fn add(todo: String) -> Result<Vec<String>, anyhow::Error> {
     let mut results = vec![];
@@ -60,6 +60,32 @@ fn remove(index: u32) -> Result<Vec<String>, anyhow::Error> {
     }
 }
 
+fn complete(index: u32) -> Result<Vec<String>, anyhow::Error> {
+    let mut results = vec![];
+    let todos = read_lines(DATA_STORE)?;
+            
+    let mut transformed = vec![];
+    let mut index_found = false;
+    for (i, todo) in todos.flatten().enumerate() {
+        if i + 1 != index.try_into().unwrap() {
+            transformed.push(todo);
+        } else {
+            index_found = true;
+            transformed.push(todo.replace(PENDING_PREFIX, COMPLETED_PREFIX));
+        }
+    }
+    if !index_found {
+        Err(anyhow!("Unable to find TODO item {}.", index))
+    } else {
+        // This is inefficient since we read all entries, transform one entry and save all of them back to file.
+        fs::write(DATA_STORE, transformed.join("\n"))
+            .with_context(|| format!("Couldn't write to file: {}", DATA_STORE))?;
+
+        results.push(format!("TODO item #{} completed.", index));
+        Ok(results)
+    }
+}
+
 fn display(todo_type: TodoType) -> Result<Vec<String>, anyhow::Error> {
     let mut results = vec![];
     let todos = read_lines(DATA_STORE)?;
@@ -86,6 +112,9 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
         },
         Command::Remove(IndexCommand { index }) => {
             remove(index)
+        },
+        Command::Complete(IndexCommand { index }) => {
+            complete(index)
         },
         Command::List => {
             display(TodoType::Pending)

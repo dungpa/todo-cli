@@ -17,6 +17,7 @@ pub struct IndexCommand {
 pub enum Command {
     Add(ContentCommand),
     Remove(IndexCommand),
+    Complete(IndexCommand),
     /// Show pending TODOs
     List,
     /// Show all TODOs including pending and completed ones

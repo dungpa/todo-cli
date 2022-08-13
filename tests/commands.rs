@@ -32,6 +32,23 @@ fn remove_todo_item_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+fn complete_todo_item_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd1 = Command::cargo_bin("todo-cli")?;
+    cmd1.arg("reset").spawn()?;
+
+    let mut cmd2 = Command::cargo_bin("todo-cli")?;
+    cmd2.arg("add").arg("First one").spawn()?;
+
+    let mut cmd = Command::cargo_bin("todo-cli")?;
+    cmd.arg("complete").arg("1");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("TODO item #1 completed."));
+
+    Ok(())
+}
+
+#[test]
 fn list_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("todo-cli")?;
     cmd1.arg("add").arg("First one").spawn()?;
