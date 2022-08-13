@@ -34,6 +34,31 @@ fn add(todo: String) -> Result<Vec<String>, anyhow::Error> {
     Ok(results)
 }
 
+fn remove(index: u32) -> Result<Vec<String>, anyhow::Error> {
+    let mut results = vec![];
+    let todos = read_lines(DATA_STORE)?;
+            
+    let mut remaining = vec![];
+    let mut index_found = false;
+    for (i, todo) in todos.flatten().enumerate() {
+        if i + 1 != index.try_into().unwrap() {
+            remaining.push(todo);
+        } else {
+            index_found = true;
+        }
+    }
+    if !index_found {
+        Err(anyhow!("Unable to find TODO item {}.", index))
+    } else {
+        // This is inefficient since we read all entries, remove one entry and save all others back to file.
+        fs::write(DATA_STORE, remaining.join("\n"))
+            .with_context(|| format!("Couldn't write to file: {}", DATA_STORE))?;
+
+        results.push(format!("TODO item #{} removed.", index));
+        Ok(results)
+    }
+}
+
 pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
     let mut results = vec![];
     match cmd {
@@ -41,27 +66,7 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
             add(todo)
         },
         Command::Remove(IndexCommand { index }) => {
-            let todos = read_lines(DATA_STORE)?;
-            
-            let mut remaining = vec![];
-            let mut index_found = false;
-            for (i, todo) in todos.flatten().enumerate() {
-                if i + 1 != index.try_into().unwrap() {
-                    remaining.push(todo);
-                } else {
-                    index_found = true;
-                }
-            }
-            if !index_found {
-                Err(anyhow!("Unable to find TODO item {}.", index))
-            } else {
-                // This is inefficient since we read all entries, remove one entry and save all others back to file.
-                fs::write(DATA_STORE, remaining.join("\n"))
-                    .with_context(|| format!("Couldn't write to file: {}", DATA_STORE))?;
-
-                results.push(format!("TODO item #{} removed.", index));
-                Ok(results)
-            }
+            remove(index)
         },
         Command::List => {
             let todos = read_lines(DATA_STORE)?;
