@@ -2,21 +2,21 @@ use clap::Parser;
 
 #[derive(Parser)]
 #[derive(Debug)]
-pub struct AddCommand {
+pub struct ContentCommand {
     pub todo: String
 }
 
 #[derive(Parser)]
 #[derive(Debug)]
-pub struct RemoveCommand {
+pub struct IndexCommand {
     pub index: u32
 }
 
 #[derive(Parser)]
 #[derive(Debug)]
 pub enum Command {
-    Add(AddCommand),
-    Remove(RemoveCommand),
+    Add(ContentCommand),
+    Remove(IndexCommand),
     /// Show pending TODOs
     List,
     /// Show all TODOs including pending and completed ones

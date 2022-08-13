@@ -22,7 +22,7 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
     let _completed_prefix = "[x]";
     let mut results = vec![];
     match cmd {
-        Command::Add(AddCommand { todo }) => {
+        Command::Add(ContentCommand { todo }) => {
             let mut file = OpenOptions::new()
                             .create(true)
                             .append(true)
@@ -30,11 +30,11 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
                             .unwrap();
 
             writeln!(file, "{} {}", pending_prefix, todo)
-                .with_context(|| format!("Couldn't write to file: {}", data_store))?;
+                .with_context(|| format!("Couldn't append to file: {}", data_store))?;
             results.push(format!("TODO item '{}' added.", todo));
             Ok(results)
         },
-        Command::Remove(RemoveCommand { index }) => {
+        Command::Remove(IndexCommand { index }) => {
             let todos = read_lines(data_store)?;
             
             let mut remaining = vec![];
@@ -49,7 +49,9 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
             if !index_found {
                 Err(anyhow!("Unable to find TODO item {}.", index))
             } else {
-                fs::write(data_store, remaining.join("\n")).expect("Unable to write to file.");
+                // This is inefficient since we read all entries, remove one entry and save all others back to file.
+                fs::write(data_store, remaining.join("\n"))
+                    .with_context(|| format!("Couldn't write to file: {}", data_store))?;
 
                 results.push(format!("TODO item #{} removed.", index));
                 Ok(results)
