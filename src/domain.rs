@@ -10,6 +10,7 @@ pub struct AddCommand {
 #[derive(Debug)]
 pub enum Command {
     Add(AddCommand),
+    List,
 }
 
 pub fn parse_command() -> Command {
