@@ -18,6 +18,7 @@ pub enum Command {
     Add(AddCommand),
     Remove(RemoveCommand),
     List,
+    Reset,
 }
 
 pub fn parse_command() -> Command {

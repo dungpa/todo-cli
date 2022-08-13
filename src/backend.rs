@@ -60,6 +60,11 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
             }
             results.push("TODO items listed.".into());
             Ok(results)
-        }
+        },
+        Command::Reset => {
+            fs::remove_file(data_store)?;
+            results.push("All TODO items deleted.".into());
+            Ok(results)
+        },
     }
 }
