@@ -3,6 +3,7 @@ use std::io::prelude::*;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+use anyhow::{Context, Result};
 
 use crate::domain::*;
 
@@ -14,29 +15,26 @@ where P: AsRef<Path>, {
     Ok(io::BufReader::new(file).lines())
 }
 
-pub fn execute(cmd: Command) {
+pub fn execute(cmd: Command) -> Result<String, anyhow::Error> {
+    let data_store = "todo.txt";
     match cmd {
         Command::Add(AddCommand { todo }) => {
             let mut file = OpenOptions::new()
                             .create(true)
                             .append(true)
-                            .open("todo.txt")
+                            .open(data_store)
                             .unwrap();
 
-            if let Err(e) = writeln!(file, "[ ] {}", todo) {
-                eprintln!("Couldn't write to file: {}", e);
-            } else {
-                println!("TODO item '{}' added.", todo)
-            }
+            writeln!(file, "[ ] {}", todo)
+                .with_context(|| format!("Couldn't write to file: {}", data_store))?;
+            Ok(format!("TODO item '{}' added.", todo))
         },
         Command::List => {
-            if let Ok(todos) = read_lines("todo.txt") {
-                for todo in todos.flatten() {
-                    println!("{}", todo);
-                }
-            } else {
-                eprintln!("Couldn't read file");
+            let todos = read_lines("todo.txt")?;
+            for todo in todos.flatten() {
+                println!("{}", todo);
             }
+            Ok("TODO items listed.".into())
         }
     }
 }

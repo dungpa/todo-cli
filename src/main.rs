@@ -3,5 +3,8 @@ mod backend;
 
 fn main() {
     let args = domain::parse_command();
-    backend::execute(args);
+    match backend::execute(args) {
+        Ok(msg) => { println!("{}", msg); },
+        Err(err) => { eprintln!("{}", err); }
+    };
 }
