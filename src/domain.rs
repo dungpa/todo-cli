@@ -34,5 +34,5 @@ pub enum TodoType {
 }
 
 pub fn parse_command() -> Command {
-    return Command::parse();
+    Command::parse()
 }
