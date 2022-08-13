@@ -26,7 +26,7 @@ fn remove_todo_item_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg("remove").arg("1");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("TODO item no. 1 removed."));
+        .stdout(predicate::str::contains("TODO item #1 removed."));
 
     Ok(())
 }
@@ -40,7 +40,7 @@ fn list_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg("list");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("TODO items listed."));
+        .stdout(predicate::str::contains("Pending TODO items listed."));
 
     Ok(())
 }

@@ -18,6 +18,8 @@ where P: AsRef<Path>, {
 
 pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
     let data_store = "todo.txt";
+    let pending_prefix = "[ ]";
+    let _completed_prefix = "[x]";
     let mut results = vec![];
     match cmd {
         Command::Add(AddCommand { todo }) => {
@@ -27,7 +29,7 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
                             .open(data_store)
                             .unwrap();
 
-            writeln!(file, "[ ] {}", todo)
+            writeln!(file, "{} {}", pending_prefix, todo)
                 .with_context(|| format!("Couldn't write to file: {}", data_store))?;
             results.push(format!("TODO item '{}' added.", todo));
             Ok(results)
@@ -49,16 +51,18 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
             } else {
                 fs::write(data_store, remaining.join("\n")).expect("Unable to write to file.");
 
-                results.push(format!("TODO item no. {} removed.", index));
+                results.push(format!("TODO item #{} removed.", index));
                 Ok(results)
             }
         },
         Command::List => {
             let todos = read_lines(data_store)?;
             for (i, todo) in todos.flatten().enumerate() {
-                results.push(format!("{}. {}", i + 1, todo));
+                if todo.starts_with(pending_prefix) {
+                    results.push(format!("{}. {}", i + 1, todo));
+                }
             }
-            results.push("TODO items listed.".into());
+            results.push("Pending TODO items listed.".into());
             Ok(results)
         },
         Command::Reset => {
