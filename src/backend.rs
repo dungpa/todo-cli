@@ -34,6 +34,7 @@ fn add(todo: String) -> Result<Vec<String>, anyhow::Error> {
     Ok(results)
 }
 
+/// Index is assumed to start from 1.
 fn remove(index: u32) -> Result<Vec<String>, anyhow::Error> {
     let mut results = vec![];
     let todos = read_lines(DATA_STORE)?;
@@ -59,6 +60,19 @@ fn remove(index: u32) -> Result<Vec<String>, anyhow::Error> {
     }
 }
 
+fn show(only_pending: bool) -> Result<Vec<String>, anyhow::Error> {
+    let mut results = vec![];
+    let todos = read_lines(DATA_STORE)?;
+    for (i, todo) in todos.flatten().enumerate() {
+        if only_pending && todo.starts_with(PENDING_PREFIX) {
+            results.push(format!("{}. {}", i + 1, todo));
+        }
+    }
+    let prefix = if only_pending { "Pending" } else { "All" };
+    results.push(format!("{} TODO items listed.", prefix));
+    Ok(results)
+}
+
 pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
     let mut results = vec![];
     match cmd {
@@ -69,22 +83,10 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
             remove(index)
         },
         Command::List => {
-            let todos = read_lines(DATA_STORE)?;
-            for (i, todo) in todos.flatten().enumerate() {
-                if todo.starts_with(PENDING_PREFIX) {
-                    results.push(format!("{}. {}", i + 1, todo));
-                }
-            }
-            results.push("Pending TODO items listed.".into());
-            Ok(results)
+            show(true)
         },
         Command::Audit => {
-            let todos = read_lines(DATA_STORE)?;
-            for (i, todo) in todos.flatten().enumerate() {
-                results.push(format!("{}. {}", i + 1, todo));
-            }
-            results.push("All TODO items listed.".into());
-            Ok(results)
+            show(false)
         },
         Command::Reset => {
             fs::remove_file(DATA_STORE)?;
