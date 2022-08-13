@@ -92,9 +92,9 @@ fn stats_todo_item_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut cmd = Command::cargo_bin("todo-cli")?;
     cmd.arg("stats");
-    cmd.assert()
-        .success()
-        .stdout(predicate::str::contains("Pending: 1 TODO item(s), completed: 1 TODO item(s)."));
+    cmd.assert().success().stdout(predicate::str::contains(
+        "Pending: 1 TODO item(s), completed: 1 TODO item(s).",
+    ));
 
     Ok(())
 }

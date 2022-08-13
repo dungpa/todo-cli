@@ -1,19 +1,16 @@
 use clap::Parser;
 
-#[derive(Parser)]
-#[derive(Debug)]
+#[derive(Parser, Debug)]
 pub struct ContentCommand {
-    pub todo: String
+    pub todo: String,
 }
 
-#[derive(Parser)]
-#[derive(Debug)]
+#[derive(Parser, Debug)]
 pub struct IndexCommand {
-    pub index: u32
+    pub index: u32,
 }
 
-#[derive(Parser)]
-#[derive(Debug)]
+#[derive(Parser, Debug)]
 pub enum Command {
     Add(ContentCommand),
     Remove(IndexCommand),
@@ -26,11 +23,10 @@ pub enum Command {
     Reset,
 }
 
-#[derive(Debug)]
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum TodoType {
     Pending,
-    All
+    All,
 }
 
 pub fn parse_command() -> Command {
