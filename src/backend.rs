@@ -16,26 +16,32 @@ where P: AsRef<Path>, {
     Ok(io::BufReader::new(file).lines())
 }
 
+const DATA_STORE: &str = "todo.txt";
+const PENDING_PREFIX: &str = "[ ]";
+const _COMPLETED_PREFIX: &str = "[x]";
+
+fn add(todo: String) -> Result<Vec<String>, anyhow::Error> {
+    let mut results = vec![];
+    let mut file = OpenOptions::new()
+                            .create(true)
+                            .append(true)
+                            .open(DATA_STORE)
+                            .unwrap();
+
+    writeln!(file, "{} {}", PENDING_PREFIX, todo)
+        .with_context(|| format!("Couldn't append to file: {}", DATA_STORE))?;
+    results.push(format!("TODO item '{}' added.", todo));
+    Ok(results)
+}
+
 pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
-    let data_store = "todo.txt";
-    let pending_prefix = "[ ]";
-    let _completed_prefix = "[x]";
     let mut results = vec![];
     match cmd {
         Command::Add(ContentCommand { todo }) => {
-            let mut file = OpenOptions::new()
-                            .create(true)
-                            .append(true)
-                            .open(data_store)
-                            .unwrap();
-
-            writeln!(file, "{} {}", pending_prefix, todo)
-                .with_context(|| format!("Couldn't append to file: {}", data_store))?;
-            results.push(format!("TODO item '{}' added.", todo));
-            Ok(results)
+            add(todo)
         },
         Command::Remove(IndexCommand { index }) => {
-            let todos = read_lines(data_store)?;
+            let todos = read_lines(DATA_STORE)?;
             
             let mut remaining = vec![];
             let mut index_found = false;
@@ -50,17 +56,17 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
                 Err(anyhow!("Unable to find TODO item {}.", index))
             } else {
                 // This is inefficient since we read all entries, remove one entry and save all others back to file.
-                fs::write(data_store, remaining.join("\n"))
-                    .with_context(|| format!("Couldn't write to file: {}", data_store))?;
+                fs::write(DATA_STORE, remaining.join("\n"))
+                    .with_context(|| format!("Couldn't write to file: {}", DATA_STORE))?;
 
                 results.push(format!("TODO item #{} removed.", index));
                 Ok(results)
             }
         },
         Command::List => {
-            let todos = read_lines(data_store)?;
+            let todos = read_lines(DATA_STORE)?;
             for (i, todo) in todos.flatten().enumerate() {
-                if todo.starts_with(pending_prefix) {
+                if todo.starts_with(PENDING_PREFIX) {
                     results.push(format!("{}. {}", i + 1, todo));
                 }
             }
@@ -68,7 +74,7 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
             Ok(results)
         },
         Command::Audit => {
-            let todos = read_lines(data_store)?;
+            let todos = read_lines(DATA_STORE)?;
             for (i, todo) in todos.flatten().enumerate() {
                 results.push(format!("{}. {}", i + 1, todo));
             }
@@ -76,7 +82,7 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
             Ok(results)
         },
         Command::Reset => {
-            fs::remove_file(data_store)?;
+            fs::remove_file(DATA_STORE)?;
             results.push("All TODO items deleted.".into());
             Ok(results)
         },
