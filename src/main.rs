@@ -4,7 +4,7 @@ mod backend;
 fn main() {
     let args = domain::parse_command();
     match backend::execute(args) {
-        Ok(msg) => { println!("{}", msg); },
+        Ok(msgs) => { for msg in msgs { println!("{}", msg); } },
         Err(err) => { eprintln!("{}", err); }
     };
 }

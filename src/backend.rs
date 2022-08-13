@@ -15,8 +15,9 @@ where P: AsRef<Path>, {
     Ok(io::BufReader::new(file).lines())
 }
 
-pub fn execute(cmd: Command) -> Result<String, anyhow::Error> {
+pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
     let data_store = "todo.txt";
+    let mut results = vec![];
     match cmd {
         Command::Add(AddCommand { todo }) => {
             let mut file = OpenOptions::new()
@@ -27,14 +28,16 @@ pub fn execute(cmd: Command) -> Result<String, anyhow::Error> {
 
             writeln!(file, "[ ] {}", todo)
                 .with_context(|| format!("Couldn't write to file: {}", data_store))?;
-            Ok(format!("TODO item '{}' added.", todo))
+            results.push(format!("TODO item '{}' added.", todo));
+            Ok(results)
         },
         Command::List => {
-            let todos = read_lines("todo.txt")?;
+            let todos = read_lines(data_store)?;
             for todo in todos.flatten() {
-                println!("{}", todo);
+                results.push(format!("{}", todo));
             }
-            Ok("TODO items listed.".into())
+            results.push("TODO items listed.".into());
+            Ok(results)
         }
     }
 }
