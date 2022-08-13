@@ -77,6 +77,29 @@ fn audit_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+fn stats_todo_item_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd1 = Command::cargo_bin("todo-cli")?;
+    cmd1.arg("reset").spawn()?;
+
+    let mut cmd2 = Command::cargo_bin("todo-cli")?;
+    cmd2.arg("add").arg("First one").spawn()?;
+
+    let mut cmd3 = Command::cargo_bin("todo-cli")?;
+    cmd3.arg("complete").arg("1").spawn()?;
+
+    let mut cmd4 = Command::cargo_bin("todo-cli")?;
+    cmd4.arg("add").arg("Second one").spawn()?;
+
+    let mut cmd = Command::cargo_bin("todo-cli")?;
+    cmd.arg("stats");
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("Pending: 1 TODO item(s), completed: 1 TODO item(s)."));
+
+    Ok(())
+}
+
+#[test]
 fn reset_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd1 = Command::cargo_bin("todo-cli")?;
     cmd1.arg("add").arg("First one").spawn()?;

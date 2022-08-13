@@ -22,6 +22,7 @@ pub enum Command {
     List,
     /// Show all TODOs including pending and completed ones
     Audit,
+    Stats,
     Reset,
 }
 

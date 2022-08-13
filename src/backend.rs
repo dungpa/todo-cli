@@ -98,6 +98,22 @@ fn display(todo_type: TodoType) -> Result<Vec<String>, anyhow::Error> {
     Ok(results)
 }
 
+fn stats() -> Result<Vec<String>, anyhow::Error> {
+    let mut results = vec![];
+    let mut pending_count = 0;
+    let mut completed_count = 0;
+    let todos = read_lines(DATA_STORE)?;
+    for todo in todos.flatten() {
+        if todo.starts_with(PENDING_PREFIX) {
+            pending_count += 1;
+        } else if todo.starts_with(COMPLETED_PREFIX) {
+            completed_count += 1;
+        }
+    }
+    results.push(format!("Pending: {} TODO item(s), completed: {} TODO item(s).", pending_count, completed_count));
+    Ok(results)
+}
+
 fn reset() -> Result<Vec<String>, anyhow::Error> {
     let mut results = vec![];
     fs::remove_file(DATA_STORE)?;
@@ -121,6 +137,9 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
         },
         Command::Audit => {
             display(TodoType::All)
+        },
+        Command::Stats => {
+            stats()
         },
         Command::Reset => {
             reset()
