@@ -73,8 +73,14 @@ fn show(only_pending: bool) -> Result<Vec<String>, anyhow::Error> {
     Ok(results)
 }
 
-pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
+fn reset() -> Result<Vec<String>, anyhow::Error> {
     let mut results = vec![];
+    fs::remove_file(DATA_STORE)?;
+    results.push("All TODO items deleted.".into());
+    Ok(results)
+}
+
+pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
     match cmd {
         Command::Add(ContentCommand { todo }) => {
             add(todo)
@@ -89,9 +95,7 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
             show(false)
         },
         Command::Reset => {
-            fs::remove_file(DATA_STORE)?;
-            results.push("All TODO items deleted.".into());
-            Ok(results)
+            reset()
         },
     }
 }
