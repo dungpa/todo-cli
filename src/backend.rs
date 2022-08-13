@@ -49,7 +49,7 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
             } else {
                 fs::write(data_store, remaining.join("\n")).expect("Unable to write to file.");
 
-                results.push(format!("TODO item {} removed.", index));
+                results.push(format!("TODO item no. {} removed.", index));
                 Ok(results)
             }
         },
