@@ -54,7 +54,7 @@ fn reset_todo_items_should_succeed() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg("reset");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("TODO items listed."));
+        .stdout(predicate::str::contains("All TODO items deleted."));
 
     Ok(())
 }
