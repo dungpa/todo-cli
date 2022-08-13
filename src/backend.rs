@@ -4,7 +4,7 @@ use std::io::prelude::*;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 
 use crate::domain::*;
 
@@ -34,17 +34,24 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
         },
         Command::Remove(RemoveCommand { index }) => {
             let todos = read_lines(data_store)?;
+            
             let mut remaining = vec![];
+            let mut index_found = false;
             for (i, todo) in todos.flatten().enumerate() {
                 if i + 1 != index.try_into().unwrap() {
                     remaining.push(todo);
+                } else {
+                    index_found = true;
                 }
             }
+            if !index_found {
+                Err(anyhow!("Unable to find TODO item {}.", index))
+            } else {
+                fs::write(data_store, remaining.join("\n")).expect("Unable to write to file.");
 
-            fs::write(data_store, remaining.join("\n")).expect("Unable to write to file.");
-
-            results.push(format!("TODO item {} removed.", index));
-            Ok(results)
+                results.push(format!("TODO item {} removed.", index));
+                Ok(results)
+            }
         },
         Command::List => {
             let todos = read_lines(data_store)?;
