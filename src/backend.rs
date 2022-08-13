@@ -20,11 +20,6 @@ const DATA_STORE: &str = "todo.txt";
 const PENDING_PREFIX: &str = "[ ]";
 const COMPLETED_PREFIX: &str = "[x]";
 
-#[cfg(windows)]
-const LINE_ENDING: &'static str = "\r\n";
-#[cfg(not(windows))]
-const LINE_ENDING: &'static str = "\n";
-
 fn add(todo: String) -> Result<Vec<String>, anyhow::Error> {
     let mut results = vec![];
     let mut file = OpenOptions::new()
@@ -57,8 +52,17 @@ fn remove(index: u32) -> Result<Vec<String>, anyhow::Error> {
         Err(anyhow!("Unable to find TODO item {}.", index))
     } else {
         // This is inefficient since we read all entries, remove one entry and save all others back to file.
-        fs::write(DATA_STORE, remaining.join(LINE_ENDING))
-            .with_context(|| format!("Couldn't write to file: {}", DATA_STORE))?;
+        let mut file = OpenOptions::new()
+                            .create(true)
+                            .write(true)
+                            .truncate(true)
+                            .open(DATA_STORE)
+                            .unwrap();
+
+        for line in remaining {
+            writeln!(file, "{}", line)
+                .with_context(|| format!("Couldn't append to file: {}", DATA_STORE))?;
+        }
 
         results.push(format!("TODO item #{} removed.", index));
         Ok(results)
@@ -83,8 +87,17 @@ fn complete(index: u32) -> Result<Vec<String>, anyhow::Error> {
         Err(anyhow!("Unable to find TODO item {}.", index))
     } else {
         // This is inefficient since we read all entries, transform one entry and save all of them back to file.
-        fs::write(DATA_STORE, transformed.join(LINE_ENDING))
-            .with_context(|| format!("Couldn't write to file: {}", DATA_STORE))?;
+        let mut file = OpenOptions::new()
+                            .create(true)
+                            .write(true)
+                            .truncate(true)
+                            .open(DATA_STORE)
+                            .unwrap();
+
+        for line in transformed {
+            writeln!(file, "{}", line)
+                .with_context(|| format!("Couldn't append to file: {}", DATA_STORE))?;
+        }
 
         results.push(format!("TODO item #{} completed.", index));
         Ok(results)
