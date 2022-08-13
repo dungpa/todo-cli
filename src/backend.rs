@@ -1,3 +1,4 @@
+use std::fs;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::fs::File;
@@ -31,10 +32,24 @@ pub fn execute(cmd: Command) -> Result<Vec<String>, anyhow::Error> {
             results.push(format!("TODO item '{}' added.", todo));
             Ok(results)
         },
+        Command::Remove(RemoveCommand { index }) => {
+            let todos = read_lines(data_store)?;
+            let mut remaining = vec![];
+            for (i, todo) in todos.flatten().enumerate() {
+                if i + 1 != index.try_into().unwrap() {
+                    remaining.push(todo);
+                }
+            }
+
+            fs::write(data_store, remaining.join("\n")).expect("Unable to write to file.");
+
+            results.push(format!("TODO item {} removed.", index));
+            Ok(results)
+        },
         Command::List => {
             let todos = read_lines(data_store)?;
-            for todo in todos.flatten() {
-                results.push(format!("{}", todo));
+            for (i, todo) in todos.flatten().enumerate() {
+                results.push(format!("{}. {}", i + 1, todo));
             }
             results.push("TODO items listed.".into());
             Ok(results)

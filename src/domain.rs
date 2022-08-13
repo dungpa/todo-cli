@@ -8,8 +8,15 @@ pub struct AddCommand {
 
 #[derive(Parser)]
 #[derive(Debug)]
+pub struct RemoveCommand {
+    pub index: u32
+}
+
+#[derive(Parser)]
+#[derive(Debug)]
 pub enum Command {
     Add(AddCommand),
+    Remove(RemoveCommand),
     List,
 }
 
